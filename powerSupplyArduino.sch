@@ -80,17 +80,6 @@ F 3 "http://www.ti.com/lit/ds/symlink/lm2902-n.pdf" H 5500 1600 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:Rotary_Encoder_Switch SW?
-U 1 1 5DB6F79F
-P 4500 6100
-F 0 "SW?" H 4500 6467 50  0000 C CNN
-F 1 "Rotary_Encoder_Switch" H 4500 6376 50  0000 C CNN
-F 2 "" H 4350 6260 50  0001 C CNN
-F 3 "~" H 4500 6360 50  0001 C CNN
-	1    4500 6100
-	1    0    0    -1  
-$EndComp
-$Comp
 L Display_Character:RC1602A U?
 U 1 1 5DB706EC
 P 8000 5050
@@ -125,4 +114,99 @@ F 3 "~" H 850 3050 50  0001 C CNN
 	1    850  3050
 	-1   0    0    1   
 $EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5DB77870
+P 4950 6200
+F 0 "#PWR?" H 4950 5950 50  0001 C CNN
+F 1 "GND" H 4955 6027 50  0000 C CNN
+F 2 "" H 4950 6200 50  0001 C CNN
+F 3 "" H 4950 6200 50  0001 C CNN
+	1    4950 6200
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5DB78ACE
+P 4000 6100
+F 0 "#PWR?" H 4000 5850 50  0001 C CNN
+F 1 "GND" H 4005 5927 50  0000 C CNN
+F 2 "" H 4000 6100 50  0001 C CNN
+F 3 "" H 4000 6100 50  0001 C CNN
+	1    4000 6100
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:Rotary_Encoder_Switch SW?
+U 1 1 5DB6F79F
+P 4500 6100
+F 0 "SW?" H 4500 6467 50  0000 C CNN
+F 1 "Rotary_Encoder_Switch" H 4500 6376 50  0000 C CNN
+F 2 "" H 4350 6260 50  0001 C CNN
+F 3 "~" H 4500 6360 50  0001 C CNN
+	1    4500 6100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4200 6100 4000 6100
+Wire Wire Line
+	4800 6200 4950 6200
+$Comp
+L Device:C C?
+U 1 1 5DB7AC07
+P 3600 5950
+F 0 "C?" H 3715 5996 50  0000 L CNN
+F 1 "0.1uF" H 3715 5905 50  0000 L CNN
+F 2 "" H 3638 5800 50  0001 C CNN
+F 3 "~" H 3600 5950 50  0001 C CNN
+	1    3600 5950
+	1    0    0    -1  
+$EndComp
+Connection ~ 4000 6100
+Wire Wire Line
+	4000 6100 3600 6100
+Wire Wire Line
+	3600 5800 3950 5800
+Wire Wire Line
+	3950 5800 3950 6000
+Wire Wire Line
+	3950 6000 4200 6000
+Wire Wire Line
+	4200 6200 4200 6400
+Wire Wire Line
+	4200 6400 3600 6400
+Text GLabel 3600 5800 0    50   Input ~ 0
+Encoder_A
+Text GLabel 3600 6400 0    50   Input ~ 0
+Encoder_B
+Text GLabel 4950 5900 2    50   Input ~ 0
+Encoder_S
+$Comp
+L Device:C C?
+U 1 1 5DB7E85A
+P 3600 6250
+F 0 "C?" H 3715 6296 50  0000 L CNN
+F 1 "0.1uF" H 3715 6205 50  0000 L CNN
+F 2 "" H 3638 6100 50  0001 C CNN
+F 3 "~" H 3600 6250 50  0001 C CNN
+	1    3600 6250
+	1    0    0    -1  
+$EndComp
+Connection ~ 3600 6100
+$Comp
+L Device:C C?
+U 1 1 5DB7EE31
+P 4950 6050
+F 0 "C?" H 5065 6096 50  0000 L CNN
+F 1 "0.1uF" H 5065 6005 50  0000 L CNN
+F 2 "" H 4988 5900 50  0001 C CNN
+F 3 "~" H 4950 6050 50  0001 C CNN
+	1    4950 6050
+	1    0    0    -1  
+$EndComp
+Connection ~ 4950 6200
+Wire Wire Line
+	4800 6000 4800 5900
+Wire Wire Line
+	4800 5900 4950 5900
 $EndSCHEMATC
