@@ -1,4 +1,5 @@
 EESchema Schematic File Version 4
+LIBS:powerSupplyArduino-cache
 EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
@@ -216,12 +217,12 @@ $EndComp
 $Comp
 L power:+5V #PWR0106
 U 1 1 5DB738C2
-P 5650 2900
-F 0 "#PWR0106" H 5650 2750 50  0001 C CNN
-F 1 "+5V" V 5665 3028 50  0000 L CNN
-F 2 "" H 5650 2900 50  0001 C CNN
-F 3 "" H 5650 2900 50  0001 C CNN
-	1    5650 2900
+P 5700 2700
+F 0 "#PWR0106" H 5700 2550 50  0001 C CNN
+F 1 "+5V" V 5715 2828 50  0000 L CNN
+F 2 "" H 5700 2700 50  0001 C CNN
+F 3 "" H 5700 2700 50  0001 C CNN
+	1    5700 2700
 	0    -1   -1   0   
 $EndComp
 $Comp
@@ -347,7 +348,7 @@ Wire Wire Line
 	6150 2550 6150 2900
 Connection ~ 5900 2900
 Wire Wire Line
-	5900 2900 5650 2900
+	5900 2900 5700 2700
 Wire Wire Line
 	6750 3800 6050 3800
 $Comp
@@ -1401,11 +1402,152 @@ Wire Wire Line
 	1200 3500 1200 3450
 Wire Wire Line
 	1200 3450 1050 3450
+Connection ~ 1050 3450
+$Comp
+L Device:R R?
+U 1 1 5DB9E650
+P 4850 3650
+F 0 "R?" V 4643 3650 50  0000 C CNN
+F 1 "1K" V 4734 3650 50  0000 C CNN
+F 2 "" V 4780 3650 50  0001 C CNN
+F 3 "~" H 4850 3650 50  0001 C CNN
+	1    4850 3650
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 5DB9F420
+P 4850 3100
+F 0 "R?" V 4643 3100 50  0000 C CNN
+F 1 "1K" V 4734 3100 50  0000 C CNN
+F 2 "" V 4780 3100 50  0001 C CNN
+F 3 "~" H 4850 3100 50  0001 C CNN
+	1    4850 3100
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	4350 3250 4600 3250
+Wire Wire Line
+	4600 3250 4600 3500
+Wire Wire Line
+	4600 3500 4850 3500
+Wire Wire Line
+	4350 3550 4450 3550
+Wire Wire Line
+	4450 3550 4450 3800
+Wire Wire Line
+	4450 3800 4850 3800
+Text GLabel 5000 3450 2    50   Input ~ 0
+Q4Base
+Text GLabel 1050 3150 2    50   Input ~ 0
+Q4Base
+Wire Wire Line
+	4450 3800 4450 3900
+Wire Wire Line
+	4450 3900 3850 3900
+Wire Wire Line
+	3850 3900 3850 3950
+Connection ~ 4450 3800
+Connection ~ 3850 3950
+$Comp
+L Device:R R?
+U 1 1 5DBB92B7
+P 5400 3600
+F 0 "R?" V 5193 3600 50  0000 C CNN
+F 1 "2K7" V 5284 3600 50  0000 C CNN
+F 2 "" V 5330 3600 50  0001 C CNN
+F 3 "~" H 5400 3600 50  0001 C CNN
+	1    5400 3600
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+15V #PWR?
+U 1 1 5DBC3176
+P 4650 4000
+F 0 "#PWR?" H 4650 3850 50  0001 C CNN
+F 1 "+15V" V 4665 4128 50  0000 L CNN
+F 2 "" H 4650 4000 50  0001 C CNN
+F 3 "" H 4650 4000 50  0001 C CNN
+	1    4650 4000
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	4850 3300 4850 3250
+Wire Wire Line
+	4350 3150 4600 3150
+Wire Wire Line
+	4600 3150 4600 2950
+Wire Wire Line
+	4600 2950 4850 2950
+Wire Wire Line
+	4350 3450 4450 3450
+Wire Wire Line
+	4450 3450 4450 3550
+Connection ~ 4450 3550
+Wire Wire Line
+	4450 3450 4450 3300
+Wire Wire Line
+	4450 3300 4850 3300
+Connection ~ 4450 3450
+Wire Wire Line
+	4850 3500 4850 3350
+Wire Wire Line
+	4850 3350 5400 3350
+Wire Wire Line
+	5400 3350 5400 3450
+Connection ~ 4850 3500
+$Comp
+L Device:R R?
+U 1 1 5DC11708
+P 4800 4000
+F 0 "R?" V 4593 4000 50  0000 C CNN
+F 1 "10" V 4684 4000 50  0000 C CNN
+F 2 "" V 4730 4000 50  0001 C CNN
+F 3 "~" H 4800 4000 50  0001 C CNN
+	1    4800 4000
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 5DC11E55
+P 5650 3600
+F 0 "R?" V 5443 3600 50  0000 C CNN
+F 1 "2K7" V 5534 3600 50  0000 C CNN
+F 2 "" V 5580 3600 50  0001 C CNN
+F 3 "~" H 5650 3600 50  0001 C CNN
+	1    5650 3600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4950 4000 5400 4000
+Wire Wire Line
+	5400 4000 5400 3750
+Wire Wire Line
+	5400 4000 5650 4000
+Wire Wire Line
+	5650 4000 5650 3750
+Connection ~ 5400 4000
+Wire Wire Line
+	5650 3450 5650 2950
+Wire Wire Line
+	5650 2950 4850 2950
+Connection ~ 4850 2950
+Text GLabel 4850 2800 1    50   Input ~ 0
+Q3Base
+Text GLabel 1050 3050 2    50   Input ~ 0
+Q3Base
+Wire Wire Line
+	4850 2800 4850 2950
+Wire Wire Line
+	5000 3450 4900 3450
+Wire Wire Line
+	4900 3450 4900 3500
+Wire Wire Line
+	4900 3500 4850 3500
 Wire Wire Line
 	9750 5300 10350 5300
 Wire Bus Line
 	9900 4700 9900 5600
 Wire Bus Line
 	8300 4700 8300 5600
-Connection ~ 1050 3450
 $EndSCHEMATC
