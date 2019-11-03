@@ -264,7 +264,7 @@ U 1 1 5DB84789
 P 6750 2350
 F 0 "C17" H 6868 2396 50  0000 L CNN
 F 1 "100uF" H 6868 2305 50  0000 L CNN
-F 2 "Capacitors_SMD:CP_Elec_8x6.5" H 6788 2200 50  0001 C CNN
+F 2 "Capacitors_SMD:CP_Elec_6.3x5.3" H 6788 2200 50  0001 C CNN
 F 3 "~" H 6750 2350 50  0001 C CNN
 	1    6750 2350
 	1    0    0    -1  
@@ -397,7 +397,7 @@ L Connector_Generic:Conn_01x04 J1
 U 1 1 5DB96830
 P 850 1550
 F 0 "J1" H 768 1125 50  0000 C CNN
-F 1 "Conn_01x04" H 768 1216 50  0000 C CNN
+F 1 "supply_shunt" H 768 1216 50  0000 C CNN
 F 2 "Pin_Headers:Pin_Header_Straight_1x04_Pitch2.54mm" H 850 1550 50  0001 C CNN
 F 3 "~" H 850 1550 50  0001 C CNN
 	1    850  1550
@@ -482,7 +482,7 @@ U 1 1 5DBB75B9
 P 4150 1500
 F 0 "RV3" H 4081 1546 50  0000 R CNN
 F 1 "1K" H 4081 1455 50  0000 R CNN
-F 2 "Potentiometers:Potentiometer_Trimmer_Bourns_3296W" H 4150 1500 50  0001 C CNN
+F 2 "Potentiometers:Potentiometer_Trimmer_Bourns_3299P" H 4150 1500 50  0001 C CNN
 F 3 "~" H 4150 1500 50  0001 C CNN
 	1    4150 1500
 	1    0    0    -1  
@@ -549,7 +549,7 @@ U 1 1 5DBC5258
 P 2600 1050
 F 0 "RV2" H 2531 1096 50  0000 R CNN
 F 1 "10K" H 2531 1005 50  0000 R CNN
-F 2 "Potentiometers:Potentiometer_Trimmer_Bourns_3296W" H 2600 1050 50  0001 C CNN
+F 2 "Potentiometers:Potentiometer_Trimmer_Bourns_3299P" H 2600 1050 50  0001 C CNN
 F 3 "~" H 2600 1050 50  0001 C CNN
 	1    2600 1050
 	1    0    0    -1  
@@ -679,33 +679,33 @@ $EndComp
 $Comp
 L Device:C C6
 U 1 1 5DBEE9D8
-P 2150 2850
-F 0 "C6" H 2265 2896 50  0000 L CNN
-F 1 "10nF" H 2265 2805 50  0000 L CNN
-F 2 "Capacitors_SMD:C_0805_HandSoldering" H 2188 2700 50  0001 C CNN
-F 3 "~" H 2150 2850 50  0001 C CNN
-	1    2150 2850
+P 2150 2750
+F 0 "C6" H 2265 2796 50  0000 L CNN
+F 1 "150nF" H 2265 2705 50  0000 L CNN
+F 2 "Capacitors_SMD:C_0805_HandSoldering" H 2188 2600 50  0001 C CNN
+F 3 "~" H 2150 2750 50  0001 C CNN
+	1    2150 2750
 	0    -1   -1   0   
 $EndComp
 $Comp
 L Device:R R6
 U 1 1 5DBFAEEA
-P 2950 2850
-F 0 "R6" V 2743 2850 50  0000 C CNN
-F 1 "100K" V 2834 2850 50  0000 C CNN
-F 2 "Resistors_SMD:R_0805_HandSoldering" V 2880 2850 50  0001 C CNN
-F 3 "~" H 2950 2850 50  0001 C CNN
-	1    2950 2850
+P 2700 2800
+F 0 "R6" V 2493 2800 50  0000 C CNN
+F 1 "100K" V 2584 2800 50  0000 C CNN
+F 2 "Resistors_SMD:R_0805_HandSoldering" V 2630 2800 50  0001 C CNN
+F 3 "~" H 2700 2800 50  0001 C CNN
+	1    2700 2800
 	0    -1   -1   0   
 $EndComp
 Wire Wire Line
-	3100 2850 3300 2850
+	2850 2800 3300 2850
 $Comp
 L Device:C C5
 U 1 1 5DBFAEF0
 P 2150 3150
 F 0 "C5" H 2265 3196 50  0000 L CNN
-F 1 "10nF" H 2265 3105 50  0000 L CNN
+F 1 "33nF" H 2265 3105 50  0000 L CNN
 F 2 "Capacitors_SMD:C_0805_HandSoldering" H 2188 3000 50  0001 C CNN
 F 3 "~" H 2150 3150 50  0001 C CNN
 	1    2150 3150
@@ -748,7 +748,7 @@ U 1 1 5DC62075
 P 2450 2300
 F 0 "RV1" V 2243 2300 50  0000 C CNN
 F 1 "10K" V 2334 2300 50  0000 C CNN
-F 2 "Potentiometers:Potentiometer_Trimmer_Bourns_3296W" H 2450 2300 50  0001 C CNN
+F 2 "Potentiometers:Potentiometer_Trimmer_Bourns_3299P" H 2450 2300 50  0001 C CNN
 F 3 "~" H 2450 2300 50  0001 C CNN
 	1    2450 2300
 	0    1    1    0   
@@ -792,17 +792,6 @@ Wire Wire Line
 Connection ~ 2450 2700
 Wire Wire Line
 	2450 2700 2450 2950
-$Comp
-L Device:CP C4
-U 1 1 5DC7428F
-P 2100 3600
-F 0 "C4" H 1982 3554 50  0000 R CNN
-F 1 "10uF" H 1982 3645 50  0000 R CNN
-F 2 "Capacitors_SMD:CP_Elec_5x5.3" H 2138 3450 50  0001 C CNN
-F 3 "~" H 2100 3600 50  0001 C CNN
-	1    2100 3600
-	-1   0    0    1   
-$EndComp
 Wire Wire Line
 	3250 3750 3250 3550
 Wire Wire Line
@@ -818,12 +807,6 @@ F 3 "~" H 1800 3600 50  0001 C CNN
 	1    1800 3600
 	-1   0    0    1   
 $EndComp
-Wire Wire Line
-	1800 3450 2100 3450
-Connection ~ 2100 3450
-Wire Wire Line
-	1800 3750 2100 3750
-Connection ~ 2100 3750
 $Comp
 L power:GND #PWR0122
 U 1 1 5DC901A1
@@ -911,7 +894,7 @@ U 1 1 5DCB3A53
 P 9400 5550
 F 0 "RV4" H 9331 5596 50  0000 R CNN
 F 1 "10K" H 9331 5505 50  0000 R CNN
-F 2 "Potentiometers:Potentiometer_Trimmer_Bourns_3296W" H 9400 5550 50  0001 C CNN
+F 2 "Potentiometers:Potentiometer_Trimmer_Bourns_3299P" H 9400 5550 50  0001 C CNN
 F 3 "~" H 9400 5550 50  0001 C CNN
 	1    9400 5550
 	1    0    0    -1  
@@ -1565,8 +1548,6 @@ LED_CUR
 Wire Wire Line
 	2500 3350 3000 3350
 Wire Wire Line
-	2100 3750 3250 3750
-Wire Wire Line
 	3350 3550 3250 3550
 Connection ~ 3250 3550
 Wire Wire Line
@@ -1649,18 +1630,16 @@ NoConn ~ 7950 4900
 NoConn ~ 7950 4400
 NoConn ~ 7950 4300
 Wire Wire Line
-	2800 2850 2300 2850
+	2550 2800 2300 2750
 Wire Wire Line
 	2750 3150 2300 3150
 Wire Wire Line
-	2000 2850 2000 3150
+	2000 2750 2000 3150
 Wire Wire Line
 	2000 3150 2000 3250
 Wire Wire Line
 	2000 3250 3350 3250
 Connection ~ 2000 3150
-Wire Wire Line
-	2100 3450 3000 3450
 Wire Wire Line
 	3000 3350 3000 3450
 Connection ~ 3000 3450
@@ -1706,12 +1685,33 @@ F 3 "~" H 5400 2300 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	9750 6150 10350 6150
-Wire Wire Line
 	4950 2150 5400 2150
+Connection ~ 5400 2150
+Wire Wire Line
+	9750 6150 10350 6150
 Wire Bus Line
 	9900 5550 9900 6450
 Wire Bus Line
 	8300 4700 8300 6450
-Connection ~ 5400 2150
+Wire Wire Line
+	1800 3750 2550 3750
+Wire Wire Line
+	1800 3450 2550 3450
+$Comp
+L Device:C C4
+U 1 1 5DC10C9D
+P 2550 3600
+F 0 "C4" H 2665 3646 50  0000 L CNN
+F 1 "10uF" H 2665 3555 50  0000 L CNN
+F 2 "Capacitors_SMD:C_0805_HandSoldering" H 2588 3450 50  0001 C CNN
+F 3 "~" H 2550 3600 50  0001 C CNN
+	1    2550 3600
+	1    0    0    -1  
+$EndComp
+Connection ~ 2550 3450
+Wire Wire Line
+	2550 3450 3000 3450
+Connection ~ 2550 3750
+Wire Wire Line
+	2550 3750 3250 3750
 $EndSCHEMATC
