@@ -1,4 +1,4 @@
-(pcb C:\TEMP\powerSupplyArduino\powerSupplyArduino.dsn
+(pcb C:\Temp\git\powerSupplyArduino\powerSupplyArduino.dsn
   (parser
     (string_quote ")
     (space_in_quoted_tokens on)
@@ -48,21 +48,21 @@
             96974.5 -96433.8  96876.5 -96164.5  96742 -95911.5  96573.5 -95679.6
             96374.5 -95473.5  96148.6 -95297.1  95900.5 -95153.8  95634.8 -95046.4
             95356.7 -94977.1  95071.7 -94947.1  94785.3 -94957.1))
-    (via_keepout "" (polygon B.Cu 0  107334 -72340  117924 -72350  117964 -82920  107354 -82950
-            107334 -72340))
+    (via_keepout "" (polygon B.Cu 0  107564 -73820  118154 -73830  118194 -84400  107584 -84430
+            107564 -73820))
     (keepout "" (polygon F.Cu 0  158320 -80182  167130 -80142  167090 -82832  158190 -82792
             158320 -80182))
-    (via_keepout "" (polygon F.Cu 0  136392 -77104  146352 -77184  146312 -79634  136472 -79714
-            136392 -77104))
-    (keepout "" (polygon F.Cu 0  103580 -91570  104360 -91250  104970 -91550  105220 -92450
-            104990 -92800  104390 -93240  103720 -93150  103320 -92570  103300 -92130
-            103510 -91800  103570 -91590  103580 -91570))
-    (keepout "" (polygon F.Cu 0  101100 -94090  101880 -93770  102490 -94070  102740 -94970
-            102510 -95320  101910 -95760  101240 -95670  100840 -95090  100820 -94650
-            101030 -94320  101090 -94110  101100 -94090))
-    (keepout "" (polygon F.Cu 0  103620 -96610  104400 -96290  105010 -96590  105260 -97490
-            105030 -97840  104430 -98280  103760 -98190  103360 -97610  103340 -97170
-            103550 -96840  103610 -96630  103620 -96610))
+    (via_keepout "" (polygon F.Cu 0  138722 -78424  148682 -78504  148642 -80954  138802 -81034
+            138722 -78424))
+    (keepout "" (polygon F.Cu 0  105290 -91570  106070 -91250  106680 -91550  106930 -92450
+            106700 -92800  106100 -93240  105430 -93150  105030 -92570  105010 -92130
+            105220 -91800  105280 -91590  105290 -91570))
+    (keepout "" (polygon F.Cu 0  102810 -94090  103590 -93770  104200 -94070  104450 -94970
+            104220 -95320  103620 -95760  102950 -95670  102550 -95090  102530 -94650
+            102740 -94320  102800 -94110  102810 -94090))
+    (keepout "" (polygon F.Cu 0  105330 -96610  106110 -96290  106720 -96590  106970 -97490
+            106740 -97840  106140 -98280  105470 -98190  105070 -97610  105050 -97170
+            105260 -96840  105320 -96630  105330 -96610))
     (keepout "" (polygon F.Cu 0  102170 -57570  101850 -56790  102150 -56180  103050 -55930
             103400 -56160  103840 -56760  103750 -57430  103170 -57830  102730 -57850
             102400 -57640  102190 -57580  102170 -57570))
@@ -81,9 +81,18 @@
     (keepout "" (polygon F.Cu 0  117680 -57490  117360 -56710  117660 -56100  118560 -55850
             118910 -56080  119350 -56680  119260 -57350  118680 -57750  118240 -57770
             117910 -57560  117700 -57500  117680 -57490))
+    (keepout "" (polygon F.Cu 0  172590 -71510  173370 -71190  173980 -71490  174230 -72390
+            174000 -72740  173400 -73180  172730 -73090  172330 -72510  172310 -72070
+            172520 -71740  172580 -71530  172590 -71510))
+    (keepout "" (polygon F.Cu 0  175060 -68950  175840 -68630  176450 -68930  176700 -69830
+            176470 -70180  175870 -70620  175200 -70530  174800 -69950  174780 -69510
+            174990 -69180  175050 -68970  175060 -68950))
+    (keepout "" (polygon F.Cu 0  172590 -66440  173370 -66120  173980 -66420  174230 -67320
+            174000 -67670  173400 -68110  172730 -68020  172330 -67440  172310 -67000
+            172520 -66670  172580 -66460  172590 -66440))
     (via "Via[0-1]_1300:700_um")
     (rule
-      (width 500)
+      (width 550)
       (clearance 200.1)
       (clearance 200.1 (type default_smd))
       (clearance 50 (type smd_smd))
@@ -91,82 +100,82 @@
   )
   (placement
     (component Potentiometers:Potentiometer_Trimmer_Bourns_3299P
-      (place RV4 104300 -92250 front 0 (PN 10K))
+      (place RV4 106050 -92300 front 0 (PN 10K))
       (place RV3 107950 -56896 front 270 (PN 1K))
-      (place RV2 173220 -73130 front 180 (PN 10K))
+      (place RV2 173230 -72220 front 180 (PN 10K))
       (place RV1 118364 -56896 front 270 (PN 10K))
     )
     (component Capacitors_SMD:CP_Elec_6.3x5.3
-      (place C17 131572 -59182 front 0 (PN 100uF))
+      (place C17 156010 -95910 front 0 (PN 100uF))
     )
     (component Capacitors_SMD:C_0805_HandSoldering
-      (place C4 135250 -68610 back 180 (PN 10uF))
-      (place C22 156460 -93950 front 0 (PN 1nF))
-      (place C21 112240 -95680 front 180 (PN 100nF))
-      (place C20 118110 -67310 front 180 (PN 100nF))
-      (place C19 112360 -98550 front 0 (PN 100nF))
-      (place C18 97180 -53030 back 270 (PN 0.1uF))
+      (place C4 135690 -70930 back 180 (PN 10uF))
+      (place C22 147890 -93510 front 0 (PN 1nF))
+      (place C21 114800 -95660 front 180 (PN 100nF))
+      (place C20 118460 -70660 back 0 (PN 100nF))
+      (place C19 114920 -98530 front 0 (PN 100nF))
+      (place C18 96600 -53120 back 270 (PN 0.1uF))
       (place C16 112502 -64002 back 0 (PN 10nF))
-      (place C12 123190 -57912 back 90 (PN 4.7uF))
+      (place C12 159240 -66020 front 180 (PN 4.7uF))
       (place C11 140070 -51860 front 180 (PN 0.1uF))
-      (place C10 123424 -64008 back 0 (PN 0.1uF))
-      (place C9 174720 -94440 front 180 (PN 4.7uF))
-      (place C7 152160 -58240 front 270 (PN 0.1uF))
-      (place C6 145020 -93950 front 180 (PN 150nF))
-      (place C5 146770 -68440 back 180 (PN 33nF))
-      (place C1 147046 -56388 back 0 (PN 100nF))
+      (place C10 124590 -63870 back 0 (PN 0.1uF))
+      (place C9 175320 -95020 front 180 (PN 4.7uF))
+      (place C7 153530 -61150 front 180 (PN 0.1uF))
+      (place C6 142730 -92200 front 270 (PN 150nF))
+      (place C5 147210 -70760 back 180 (PN 33nF))
+      (place C1 139980 -60960 back 0 (PN 100nF))
     )
     (component "Package_QFP:TQFP-32_7x7mm_P0.8mm"
-      (place U3 112644 -77630 front 0 (PN "ATmega8A-AU"))
+      (place U3 112874 -79110 front 0 (PN "ATmega8A-AU"))
     )
     (component "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm"
-      (place U2 141417 -78444 front 90 (PN TL494))
+      (place U2 143747 -79764 front 90 (PN TL494))
     )
     (component "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm"
       (place U1 162630 -81512 front 90 (PN LM324))
     )
     (component Resistors_SMD:R_0805_HandSoldering
-      (place R29 156730 -98320 front 180 (PN 18K))
-      (place R28 141050 -65034 front 0 (PN 1K))
-      (place R26 150540 -93980 front 0 (PN 1K))
-      (place R23 147066 -58928 back 180 (PN 1K))
-      (place R22 174820 -97920 front 180 (PN 1K))
-      (place R20 99090 -87290 front 0 (PN 100K))
-      (place R19 96100 -77260 front 0 (PN 100))
-      (place R18 123190 -67310 front 0 (PN 1K))
-      (place R17 117936 -63972 back 0 (PN 1K))
-      (place R16 112696 -67564 front 180 (PN 1K))
-      (place R15 140034 -59436 front 180 (PN 1K))
-      (place R14 135208 -65024 front 180 (PN 47K))
-      (place R12 174820 -91030 front 0 (PN 47K))
-      (place R10 146502 -65070 front 0 (PN 100K))
-      (place R8 97282 -53006 front 270 (PN 1K))
-      (place R6 139540 -94010 front 180 (PN 100K))
-      (place R5 152580 -68390 back 0 (PN 100K))
-      (place R3 140128 -56388 back 180 (PN 330))
-      (place R2 174820 -82670 front 0 (PN 1K))
+      (place R29 148080 -88790 front 180 (PN 18K))
+      (place R28 141750 -65900 front 0 (PN 1K))
+      (place R26 162130 -89260 front 0 (PN 1K))
+      (place R23 146590 -61000 back 180 (PN 1K))
+      (place R22 175350 -98120 front 180 (PN 1K))
+      (place R20 99090 -87290 back 180 (PN 100K))
+      (place R19 99160 -83870 front 0 (PN 100))
+      (place R18 124560 -70580 back 180 (PN 1K))
+      (place R17 118590 -63950 back 0 (PN 1K))
+      (place R16 112406 -70844 back 0 (PN 1K))
+      (place R15 135610 -65990 front 0 (PN 1K))
+      (place R14 174980 -87960 front 180 (PN 47K))
+      (place R12 175290 -91840 front 0 (PN 47K))
+      (place R10 147710 -65710 front 0 (PN 100K))
+      (place R8 154970 -89070 front 0 (PN 1K))
+      (place R6 139102 -92100 front 90 (PN 100K))
+      (place R5 153020 -70710 back 0 (PN 100K))
+      (place R3 153340 -56220 back 180 (PN 330))
+      (place R2 175130 -79970 front 0 (PN 1K))
     )
     (component Resistors_SMD:R_0805_HandSoldering::1
-      (place R27 149040 -98500 front 180 (PN 1K))
-      (place R25 119820 -92710 back 270 (PN 2K7))
-      (place R24 122990 -92570 front 90 (PN 2K7))
-      (place R21 126100 -92710 back 90 (PN 10))
-      (place R9 158830 -68220 back 0 (PN 1K))
-      (place R7 133070 -92740 back 270 (PN 1.8K))
-      (place R4 140990 -68440 back 180 (PN 56K))
-      (place R1 174820 -78780 front 0 (PN 1K))
+      (place R27 120810 -92100 back 90 (PN 1K))
+      (place R25 124468 -92100 back 270 (PN 2K7))
+      (place R24 128127 -92100 front 90 (PN 2K7))
+      (place R21 131785 -92100 back 90 (PN 10))
+      (place R9 159270 -70540 back 0 (PN 1K))
+      (place R7 135443 -92100 front 90 (PN 1.8K))
+      (place R4 141430 -70760 back 180 (PN 56K))
+      (place R1 175370 -76790 front 0 (PN 1K))
     )
     (component Inductor_SMD:L_1210_3225Metric_Pad1.42x2.65mm_HandSolder
-      (place L1 129540 -65568.5 front 270 (PN 100uH))
+      (place L1 128940 -78840 front 270 (PN 100uH))
     )
     (component Pin_Headers:Pin_Header_Straight_1x05_Pitch2.54mm
-      (place J6 134490 -52150 front 270 (PN Encoder))
+      (place J6 134600 -52730 front 270 (PN Encoder))
     )
     (component Pin_Headers:Pin_Header_Straight_2x03_Pitch2.54mm
-      (place J5 102108 -67056 front 90 (PN ISP))
+      (place J5 107280 -64490 front 270 (PN ISP))
     )
     (component Pin_Headers:Pin_Header_Straight_1x02_Pitch2.54mm
-      (place J4 94620 -85170 front 270 (PN Termo_sens))
+      (place J4 91950 -84970 front 0 (PN Termo_sens))
     )
     (component Pin_Headers:Pin_Header_Straight_1x12_Pitch2.54mm
       (place J3 91870 -51910 front 0 (PN Display))
@@ -175,17 +184,17 @@
       (place J2 143010 -97370 front 270 (PN "Main connector"))
     )
     (component Pin_Headers:Pin_Header_Straight_1x04_Pitch2.54mm
-      (place J1 145510 -52070 front 90 (PN supply_shunt))
+      (place J1 146470 -52730 front 90 (PN supply_shunt))
     )
     (component Capacitors_SMD:C_0805_HandSoldering::1
-      (place C15 174720 -86270 front 0 (PN 100nF))
+      (place C15 174860 -83690 front 0 (PN 100nF))
     )
     (component Capacitors_SMD:CP_Elec_5x5.3
-      (place C8 174200 -61410 front 0 (PN 22uF))
-      (place C3 173910 -54020 front 0 (PN 10uF))
+      (place C8 174780 -59420 front 0 (PN 22uF))
+      (place C3 174780 -53370 front 0 (PN 10uF))
     )
     (component Capacitors_SMD:CP_Elec_8x6.5
-      (place C2 161860 -58660 front 180 (PN 100uF))
+      (place C2 163770 -57400 front 270 (PN 100uF))
     )
   )
   (library
@@ -998,18 +1007,16 @@
       Encoder_B Encoder_S FAN_CNTR GND ISP_RESET ISP_VCC LED_CUR MISO MOSI
       "Net-(C12-Pad1)" "Net-(C16-Pad1)" "Net-(C20-Pad1)" "Net-(C21-Pad1)"
       "Net-(C22-Pad1)" "Net-(C4-Pad1)" "Net-(C4-Pad2)" "Net-(C5-Pad1)" "Net-(C5-Pad2)"
-      "Net-(C6-Pad2)" "Net-(C7-Pad2)" "Net-(C9-Pad1)" "Net-(J2-Pad10)" "Net-(J2-Pad2)"
-      "Net-(J2-Pad4)" "Net-(J2-Pad6)" "Net-(R1-Pad1)" "Net-(R10-Pad1)" "Net-(R10-Pad2)"
-      "Net-(R12-Pad1)" "Net-(R14-Pad2)" "Net-(R15-Pad1)" "Net-(R15-Pad2)"
-      "Net-(R17-Pad2)" "Net-(R18-Pad2)" "Net-(R2-Pad1)" "Net-(R21-Pad1)" "Net-(R26-Pad1)"
-      "Net-(R29-Pad2)" "Net-(R3-Pad1)" "Net-(R5-Pad1)" "Net-(R8-Pad1)" "Net-(R9-Pad1)"
-      "Net-(U3-Pad1)" "Net-(U3-Pad19)" "Net-(U3-Pad22)" "Net-(U3-Pad27)" "Net-(U3-Pad28)"
-      Q3Base Q4Base Supply+ "Supply-" TERMO_SENS
+      "Net-(C6-Pad2)" "Net-(C7-Pad2)" "Net-(C9-Pad1)" "Net-(R1-Pad1)" "Net-(R10-Pad1)"
+      "Net-(R10-Pad2)" "Net-(R12-Pad1)" "Net-(R14-Pad2)" "Net-(R15-Pad1)"
+      "Net-(R15-Pad2)" "Net-(R17-Pad2)" "Net-(R18-Pad2)" "Net-(R2-Pad1)" "Net-(R21-Pad1)"
+      "Net-(R26-Pad1)" "Net-(R29-Pad2)" "Net-(R3-Pad1)" "Net-(R5-Pad1)" "Net-(R8-Pad1)"
+      "Net-(R9-Pad1)" Q3Base Q4Base Supply+ "Supply-" TERMO_SENS
       (circuit
         (use_via Via[0-1]_1300:700_um)
       )
       (rule
-        (width 500)
+        (width 550)
         (clearance 200.1)
       )
     )
