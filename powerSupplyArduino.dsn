@@ -1,4 +1,4 @@
-(pcb C:\TEMP\powerSupplyArduino\powerSupplyArduino.dsn
+(pcb C:\Temp\git\powerSupplyArduino\powerSupplyArduino.dsn
   (parser
     (string_quote ")
     (space_in_quoted_tokens on)
@@ -24,6 +24,8 @@
       (path pcb 0  180000 -100000  90000 -100000  90000 -50000  180000 -50000
             180000 -100000)
     )
+    (keepout "" (polygon F.Cu 0  116240 -77800  114950 -75620  119940 -75540  118610 -77800
+            116240 -77800))
     (via "Via[0-1]_1000:700_um")
     (rule
       (width 600)
@@ -39,7 +41,7 @@
     )
     (component Pin_Headers:Pin_Header_Straight_1x02_Pitch2.54mm
       (place J8 152680 -52960 front 90 (PN Supply))
-      (place J4 91950 -84970 front 0 (PN Termo_sens))
+      (place J4 92080 -87290 front 180 (PN Termo_sens))
     )
     (component Pin_Headers:Pin_Header_Straight_1x01_Pitch2.54mm
       (place J12 120440 -96520 front 0 (PN "Fun ctrl"))
@@ -828,15 +830,13 @@
       (pins U2-6 R29-2)
     )
     (class kicad_default "" /A /D4 /D5 /D6 /D7 /E /RS /RW /Vo Encoder_A Encoder_B
-      Encoder_S FAN_CNTR ISP_RESET ISP_VCC LED_CUR MISO MOSI "Net-(C12-Pad1)"
-      "Net-(C16-Pad1)" "Net-(C20-Pad1)" "Net-(C21-Pad1)" "Net-(C22-Pad1)"
-      "Net-(C4-Pad1)" "Net-(C4-Pad2)" "Net-(C5-Pad1)" "Net-(C5-Pad2)" "Net-(C6-Pad2)"
-      "Net-(C7-Pad2)" "Net-(C9-Pad1)" "Net-(J11-Pad1)" "Net-(R1-Pad1)" "Net-(R10-Pad1)"
-      "Net-(R10-Pad2)" "Net-(R12-Pad1)" "Net-(R14-Pad2)" "Net-(R15-Pad1)"
-      "Net-(R15-Pad2)" "Net-(R17-Pad2)" "Net-(R18-Pad2)" "Net-(R2-Pad1)" "Net-(R21-Pad1)"
-      "Net-(R26-Pad1)" "Net-(R29-Pad2)" "Net-(R3-Pad1)" "Net-(R5-Pad1)" "Net-(R8-Pad1)"
-      "Net-(R9-Pad1)" "Net-(U3-Pad1)" "Net-(U3-Pad19)" "Net-(U3-Pad22)" "Net-(U3-Pad27)"
-      "Net-(U3-Pad28)" Q3Base Q4Base TERMO_SENS
+      Encoder_S FAN_CNTR ISP_RESET LED_CUR MISO MOSI "Net-(C12-Pad1)" "Net-(C16-Pad1)"
+      "Net-(C20-Pad1)" "Net-(C21-Pad1)" "Net-(C22-Pad1)" "Net-(C4-Pad1)" "Net-(C4-Pad2)"
+      "Net-(C5-Pad1)" "Net-(C5-Pad2)" "Net-(C6-Pad2)" "Net-(C7-Pad2)" "Net-(C9-Pad1)"
+      "Net-(R1-Pad1)" "Net-(R10-Pad1)" "Net-(R10-Pad2)" "Net-(R12-Pad1)" "Net-(R14-Pad2)"
+      "Net-(R15-Pad1)" "Net-(R15-Pad2)" "Net-(R17-Pad2)" "Net-(R18-Pad2)"
+      "Net-(R2-Pad1)" "Net-(R21-Pad1)" "Net-(R26-Pad1)" "Net-(R29-Pad2)" "Net-(R3-Pad1)"
+      "Net-(R5-Pad1)" "Net-(R8-Pad1)" "Net-(R9-Pad1)" Q3Base Q4Base TERMO_SENS
       (circuit
         (use_via Via[0-1]_1000:700_um)
       )
@@ -854,7 +854,7 @@
         (clearance 200.1)
       )
     )
-    (class +5 Supply+ "Supply-"
+    (class +5 ISP_VCC Supply+ "Supply-"
       (circuit
         (use_via Via[0-1]_1000:700_um)
       )
