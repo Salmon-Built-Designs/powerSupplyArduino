@@ -14,11 +14,20 @@
 #include "avr/interrupt.h"
 #include "string.h"
 
+enum modes {NORMAL_MODE, VOLTAGE_SET_MODE, CURRENT_SET_MODE} mode; // 0 - work mode (display cur volumes), 1 - set voltage, 2 - set current
 
+#define VAL2PWM10(val, maxval) val* 1023/maxval
 #define CUR_LIMIT_ON PORTB |= 0x01
 #define CUR_LIMIT_OFF PORTB&=0xFE
 #define CUR_LIMIT_INV PORTB^=0x01
 #define BLINK_POST_SCAL 25
+#define ENCODER_STEP 10
+
+#define  VOLTAGE_MAX 2500
+#define  CUR_MAX 1700
+
+
+
 uint8_t blink = 1;
 
 uint8_t blinkPostScal =  BLINK_POST_SCAL;
@@ -28,7 +37,7 @@ uint16_t  settedCurrent = 20;
 uint16_t  CurrentCurrent = 10;
 uint16_t  CurrentVoltage = 2550;
 
-uint8_t mode = 0; // 0 - work mode (display cur volumes), 1 - set voltage, 2 - set current
+//uint8_t mode = 0; // 0 - work mode (display cur volumes), 1 - set voltage, 2 - set current
 uint8_t need2refresh = 0;
 
 uint8_t lastEncoder;
@@ -36,7 +45,6 @@ uint8_t lastEncoder;
 char lcdStr0[16+1];
 char lcdStr1[16+1];
 char bufStr[8+1];
-
 
 
 void readEncoder(void){
@@ -48,16 +56,18 @@ void readEncoder(void){
     
      // to left
      if ((curEncoder==128 && lastEncoder == 192 )|| (curEncoder == 160 && lastEncoder == 128)) {
-switch (mode) { case 1: settedVoltage-=10; break; case 2: settedCurrent-=10; break;}
+switch (mode) { case VOLTAGE_SET_MODE: if (settedVoltage>=ENCODER_STEP) settedVoltage-=10;  break; case CURRENT_SET_MODE: if (settedCurrent>=ENCODER_STEP) settedCurrent-=10; break;}
 
 }
     // to right
     if ((curEncoder == 128 && lastEncoder == 160) || (curEncoder == 192 && lastEncoder == 128)) {
-         switch (mode) { case 1: settedVoltage+=10; break; case 2: settedCurrent+=10; break;}
+         switch (mode) { case VOLTAGE_SET_MODE: if (settedVoltage < VOLTAGE_MAX - ENCODER_STEP) settedVoltage+=10; break; case CURRENT_SET_MODE:if (settedCurrent < CUR_MAX - ENCODER_STEP)  settedCurrent+=10; break;}
         
 
 }
-
+     
+    OCR1B = VAL2PWM10(settedVoltage, VOLTAGE_MAX);
+    OCR1A = VAL2PWM10(settedCurrent , CUR_MAX);
 
     lastEncoder = curEncoder;
 }
@@ -150,7 +160,10 @@ ADMUX |= (1<<REFS1)|(1<<REFS0); //Внутренний Источник ОН 2,56в, вход ADC0
 
 void initTimers(void){
 TIMSK =(1<<TOIE0);  // timer0 enable
-TCCR0 = (1<<CS02); // prescaler 1/256
+TCCR0 = (1<<CS02); // prescaler for timer 0  = 1/256
+// timer 1 pwm for 2 channel
+TCCR1A = 2<<COM1A0|2<<COM1B0|1<<WGM12|1<<WGM11|1<<WGM10;
+TCCR1B = 1 << CS10;
 
 }
 
