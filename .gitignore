@@ -2,3 +2,5 @@
 *.sch-bak
 *-cache*
 *pcb-bak
+/firmWare/powerSupplyArduino/powerSupplyArduino/Debug
+/firmWare/powerSupplyArduino/powerSupplyArduino/Release
