@@ -1,9 +1,9 @@
 /*
- * powerSupplyArduino.c
- *
- * Created: 26.12.2019 19:34:45
- * Author : Nataly
- */ 
+* powerSupplyArduino.c
+*
+* Created: 26.12.2019 19:34:45
+* Author : Nataly
+*/
 
 #define F_CPU 8000000L
 
@@ -48,24 +48,36 @@ char bufStr[8+1];
 
 
 void readEncoder(void){
-     //mode = PORTB;
-     uint8_t curEncoder = PINB & (7<<5);
-      if (lastEncoder  == 0 || curEncoder == lastEncoder) {lastEncoder = curEncoder; return;}
+    //mode = PORTB;
+    uint8_t curEncoder = PINB & (7<<5);
+    if (lastEncoder  == 0 || curEncoder == lastEncoder) {lastEncoder = curEncoder; return;}
     // check press button
-     if (curEncoder & (1 << PINB7) && !(lastEncoder & (1 << PINB7) )) mode = (mode+1) % 3;
+    if (curEncoder & (1 << PINB7) && !(lastEncoder & (1 << PINB7) )) mode = (mode+1) % 3;
     
-     // to left
-     if ((curEncoder==128 && lastEncoder == 192 )|| (curEncoder == 160 && lastEncoder == 128)) {
-switch (mode) { case VOLTAGE_SET_MODE: if (settedVoltage>=ENCODER_STEP) settedVoltage-=10;  break; case CURRENT_SET_MODE: if (settedCurrent>=ENCODER_STEP) settedCurrent-=10; break;}
+    // to left
+    if ((curEncoder==128 && lastEncoder == 192 )|| (curEncoder == 160 && lastEncoder == 128)) {
+        switch (mode) {
+            case VOLTAGE_SET_MODE:
+            if (settedVoltage>=ENCODER_STEP) settedVoltage-=10;  break;
+            case CURRENT_SET_MODE:
+            if (settedCurrent>=ENCODER_STEP) settedCurrent-=10; break;
+            case NORMAL_MODE: break;
+        }
 
-}
+    }
     // to right
     if ((curEncoder == 128 && lastEncoder == 160) || (curEncoder == 192 && lastEncoder == 128)) {
-         switch (mode) { case VOLTAGE_SET_MODE: if (settedVoltage < VOLTAGE_MAX - ENCODER_STEP) settedVoltage+=10; break; case CURRENT_SET_MODE:if (settedCurrent < CUR_MAX - ENCODER_STEP)  settedCurrent+=10; break;}
+        switch (mode) {
+            case VOLTAGE_SET_MODE:
+            if (settedVoltage < VOLTAGE_MAX - ENCODER_STEP) settedVoltage+=10; break;
+            case CURRENT_SET_MODE:
+            if (settedCurrent < CUR_MAX - ENCODER_STEP)  settedCurrent+=10; break;
+            case NORMAL_MODE: break;
+        }
         
 
-}
-     
+    }
+    // set value to PWM
     OCR1B = VAL2PWM10(settedVoltage, VOLTAGE_MAX);
     OCR1A = VAL2PWM10(settedCurrent , CUR_MAX);
 
@@ -81,16 +93,16 @@ ISR(TIMER0_OVF_vect){
         blink=~blink;
         blinkPostScal = BLINK_POST_SCAL;
         //displeyCurVal();
-      ++need2refresh;
-      /*  if (blink){
+        ++need2refresh;
+        /*  if (blink){
         lcd_return_home();
         lcd_puts("50");
         } else
         {
-          lcd_return_home();
-          lcd_puts("  ");  
+        lcd_return_home();
+        lcd_puts("  ");
         }*/
-}
+    }
 }
 
 void displeyVal(void){
@@ -98,72 +110,72 @@ void displeyVal(void){
 
     itoa(mode==1? settedVoltage:CurrentVoltage, bufStr, 10);
 
- // display voltage in first line
+    // display voltage in first line
     for (int i = 0 ; i < LCD_COL_COUNT; i++) lcdStr0[i] = ' ';
-   char len;
+    char len;
     if (mode != 1 || blink==1 )
     {
-    
-    lcdStr0[0] = 'V';
-    lcdStr0[1] = ':';
-    
-    len = strlen(bufStr);
-    switch (len) {
-    case 4: lcdStr0[2] = bufStr[0]; lcdStr0[3] = bufStr[1]; lcdStr0[4] = ','; lcdStr0[5] = bufStr[2]; lcdStr0[6] = bufStr[3]; break;
-    case 3: lcdStr0[2] = bufStr[0]; lcdStr0[3] = ','; lcdStr0[4] = bufStr[1]; lcdStr0[5] = bufStr[2];  break;
-    case 2: lcdStr0[2] = '0'; lcdStr0[3] = ','; lcdStr0[4] = bufStr[0]; lcdStr0[5] = bufStr[1]; break;
-}
+        
+        lcdStr0[0] = 'V';
+        lcdStr0[1] = ':';
+        
+        len = strlen(bufStr);
+        switch (len) {
+            case 4: lcdStr0[2] = bufStr[0]; lcdStr0[3] = bufStr[1]; lcdStr0[4] = ','; lcdStr0[5] = bufStr[2]; lcdStr0[6] = bufStr[3]; break;
+            case 3: lcdStr0[2] = bufStr[0]; lcdStr0[3] = ','; lcdStr0[4] = bufStr[1]; lcdStr0[5] = bufStr[2];  break;
+            case 2: lcdStr0[2] = '0'; lcdStr0[3] = ','; lcdStr0[4] = bufStr[0]; lcdStr0[5] = bufStr[1]; break;
+        }
 
-    lcdStr0[len==4?7:6] = ' ';
-    lcdStr0[len==4?8:7] = 'B';
-}
-  // display current in second line
+        lcdStr0[len==4?7:6] = ' ';
+        lcdStr0[len==4?8:7] = 'B';
+    }
+    // display current in second line
     itoa(mode==2 ? settedCurrent: CurrentCurrent, bufStr, 10);
     len = strlen(bufStr);
     for (int i = 0 ; i < LCD_COL_COUNT; i++) lcdStr1[i] = ' ';
     if ( mode != 2  || blink == 1) {
-    lcdStr1[0] = 'C';
-    lcdStr1[1] = ':';     
+        lcdStr1[0] = 'C';
+        lcdStr1[1] = ':';
 
-    switch (strlen(bufStr)) {
-        case 4: lcdStr1[2] = bufStr[0]; lcdStr1[3] = bufStr[1]; lcdStr1[4] = ','; lcdStr1[5] = bufStr[2]; lcdStr1[6] = bufStr[3];  break;
-        case 3: lcdStr1[2] = bufStr[0]; lcdStr1[3] = ','; lcdStr1[4] = bufStr[1]; lcdStr1[5] = bufStr[2];  break;
-        case 2: lcdStr1[2] = '0'; lcdStr1[3] = ','; lcdStr1[4] = bufStr[0]; lcdStr1[5] = bufStr[1];  break;
+        switch (strlen(bufStr)) {
+            case 4: lcdStr1[2] = bufStr[0]; lcdStr1[3] = bufStr[1]; lcdStr1[4] = ','; lcdStr1[5] = bufStr[2]; lcdStr1[6] = bufStr[3];  break;
+            case 3: lcdStr1[2] = bufStr[0]; lcdStr1[3] = ','; lcdStr1[4] = bufStr[1]; lcdStr1[5] = bufStr[2];  break;
+            case 2: lcdStr1[2] = '0'; lcdStr1[3] = ','; lcdStr1[4] = bufStr[0]; lcdStr1[5] = bufStr[1];  break;
+        }
+        lcdStr1[len==4?7:6] = ' ';
+        lcdStr1[len==4?8:7] = 'A';
     }
-    lcdStr1[len==4?7:6] = ' ';
-    lcdStr1[len==4?8:7] = 'A';
-}
     lcd_puts(lcdStr0);
     lcd_set_cursor(0,1);
     lcd_puts(lcdStr1);
 
-  //debug info
-  lcd_set_cursor(10,1);
-  itoa(lastEncoder, bufStr, 10);
-  lcd_puts(bufStr);
+    //debug info
+    lcd_set_cursor(10,1);
+    itoa(lastEncoder, bufStr, 10);
+    lcd_puts(bufStr);
 
 }
 
 void initPorts(void){
-// current limit led out mode
+    // current limit led out mode
     DDRB  = 0x01;
-// encoder pins as input
+    // encoder pins as input
     DDRB &= ~(7<<5);
     PORTB|= (7<<5); //pull up
-//ADT
-//http://narodstream.ru/avr-urok-22-izuchaem-acp-chast-2/
-ADCSRA |= (1<<ADEN) // Разрешение использования АЦП
-|(1<<ADPS2)|(1<<ADPS1);//Делитель 64 = 128 кГц  
-ADMUX |= (1<<REFS1)|(1<<REFS0); //Внутренний Источник ОН 2,56в, вход ADC0
+    //ADT
+    //http://narodstream.ru/avr-urok-22-izuchaem-acp-chast-2/
+    ADCSRA |= (1<<ADEN) // Разрешение использования АЦП
+    |(1<<ADPS2)|(1<<ADPS1);//Делитель 64 = 128 кГц
+    ADMUX |= (1<<REFS1)|(1<<REFS0); //Внутренний Источник ОН 2,56в, вход ADC0
 
 }
 
 void initTimers(void){
-TIMSK =(1<<TOIE0);  // timer0 enable
-TCCR0 = (1<<CS02); // prescaler for timer 0  = 1/256
-// timer 1 pwm for 2 channel
-TCCR1A = 2<<COM1A0|2<<COM1B0|1<<WGM12|1<<WGM11|1<<WGM10;
-TCCR1B = 1 << CS10;
+    TIMSK =(1<<TOIE0);  // timer0 OF interrupt enable
+    TCCR0 = (1<<CS02); // prescaler for timer 0  = 1/256
+    // timer 1 pwm for 2 channel
+    TCCR1A = 0b10100011; //COM1x1 + COM1x2 = 10b (non invert fast pwm) FOC1A = 0, FOC1B = 0, WGM11 = 1, WGM10 = 1
+    TCCR1B = 0b00001001; //ICNC1 =0, ICES1 =0, -, WGM13 = 0, WGM12 = 1, SC12 = 0, SC11=0, SC10 = 1 // 10 bit fast PWM , no prescaling
 
 }
 
@@ -171,39 +183,39 @@ TCCR1B = 1 << CS10;
 
 int main(void)
 {
-	
-	initPorts();
+    
+    initPorts();
     initTimers();
     
     lcd_clear();
     lcd_init();
     
     lcd_on();
-   // lcd_set_cursor(0,0);
+    // lcd_set_cursor(0,0);
     //lcd_enable_blinking();
-  //  lcd_puts("Set:");
-   // itoa(settedVoltage,str,10);
-  //  lcd_return_home();
- //   lcd_set_cursor(1,1);
-  //  lcd_puts(str);
+    //  lcd_puts("Set:");
+    // itoa(settedVoltage,str,10);
+    //  lcd_return_home();
+    //   lcd_set_cursor(1,1);
+    //  lcd_puts(str);
     sei();
     /* Replace with your application code */
-   // displeyCurVal();
-    while (1) 
+    // displeyCurVal();
+    while (1)
     {
         if (need2refresh) {need2refresh = 0; displeyVal();}
-displeyVal();
- //   	CUR_LIMIT_INV;
-    /*    for (char i=0; i < 2; i++) {
-            lcd_set_cursor(0,i);
-            lcd_puts("     ");
+        displeyVal();
+        //   	CUR_LIMIT_INV;
+        /*    for (char i=0; i < 2; i++) {
+        lcd_set_cursor(0,i);
+        lcd_puts("     ");
         }
-		_delay_ms(300);
+        _delay_ms(300);
         for (char i=0; i < 2; i++) {
-            lcd_set_cursor(0,i);
-            lcd_puts("50    ");
+        lcd_set_cursor(0,i);
+        lcd_puts("50    ");
         }
-		_delay_ms(300);*/
+        _delay_ms(300);*/
     }
 }
 
