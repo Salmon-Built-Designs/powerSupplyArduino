@@ -16,6 +16,7 @@
 #include "avr/eeprom.h"
 
 enum modes {NORMAL_MODE, VOLTAGE_SET_MODE, CURRENT_SET_MODE} mode; // 0 - work mode (display cur volumes), 1 - set voltage, 2 - set current
+enum AdcInputs {VOLTAGE_ADC = 0b0010, CURRENT_ADC = 0b0000, TERM_ADC = 0b0011} AdcInput = VOLTAGE_ADC;    
 
 #define VAL2PWM10(val, maxval) val* 1023/maxval
 #define CUR_LIMIT_ON PORTB |= 0x01
@@ -26,6 +27,7 @@ enum modes {NORMAL_MODE, VOLTAGE_SET_MODE, CURRENT_SET_MODE} mode; // 0 - work m
 
 #define  VOLTAGE_MAX 2500
 #define  CUR_MAX 1700
+#define  UREF = 256 //2.56 * 10
 
 
 
@@ -37,12 +39,13 @@ uint16_t  settedVoltage = 50;
 uint16_t  settedVoltageEeprom EEMEM = 100;
 uint16_t  settedCurrent = 20;
 uint16_t  settedCurrentEeprom EEMEM = 100 ;
-uint16_t  CurrentCurrent = 10;
-uint16_t  CurrentVoltage = 2550;
-//uint8_t test = 0;
+uint16_t  volatile CurrentCurrent = 10;
+uint16_t  volatile CurrentVoltage = 2550;
+uint16_t AdcAvgBuf;
+uint8_t volatile AdcCount = 0;
+uint8_t volatile AdcCountAvg = 0;
 
-//uint8_t mode = 0; // 0 - work mode (display cur volumes), 1 - set voltage, 2 - set current
-uint8_t LcdNeed2refresh = 0;
+uint8_t volatile  LcdNeed2refresh = 0;
 
 uint8_t lastEncoder;
 
@@ -119,6 +122,38 @@ ISR(TIMER0_OVF_vect){
     }
 }
 
+ISR(ADC_vect){
+        
+        
+        
+        
+    if (!AdcCountAvg) {AdcAvgBuf = ADCW;   } else {AdcAvgBuf+=ADCW;}        
+    if (AdcCountAvg == 3) {
+        
+        switch(AdcInput){
+            case VOLTAGE_ADC:
+                        CurrentVoltage = AdcAvgBuf * VOLTAGE_MAX / 1024 / 4 ; break;
+            case CURRENT_ADC: 
+                        CurrentCurrent =  AdcAvgBuf * CUR_MAX / 1024 / 4 ; break;   
+            case TERM_ADC:     break; // need todo   
+            
+        }
+      AdcCountAvg = 0;  
+      ++AdcCount;  
+    }  else {++AdcCountAvg;}  
+    
+    
+   // next conversion preparation
+   if (AdcCount == 0xff) { AdcInput = TERM_ADC; } else { AdcInput =  AdcCount % 2 == 0 ? VOLTAGE_ADC: CURRENT_ADC;   }
+   // change input pin 
+   ADMUX = (ADMUX & 0xF0) | AdcInput;
+   // Delay needed for the stabilization of the ADC input voltage
+   _delay_us(10);
+   //start conversation
+   ADCSRA |= 0x40; // set Bit 6 – ADSC: ADC Start Conversion 
+   
+}
+
 void displeyVal(void){
     if (LcdNeed2refresh == 0) {return;} else {LcdNeed2refresh = 0;};
     lcd_return_home();
@@ -170,7 +205,7 @@ void displeyVal(void){
     //debug info
     
      lcd_set_cursor(12,0);
-     itoa(110, bufStr, 10);
+     itoa(AdcCount, bufStr, 10);
      lcd_puts(bufStr);
     
     lcd_set_cursor(10,1);
@@ -205,6 +240,12 @@ void initTimers(void){
     TCCR1B = 0b00001001; //ICNC1 =0, ICES1 =0, -, WGM13 = 0, WGM12 = 1, SC12 = 0, SC11=0, SC10 = 1 // 10 bit fast PWM , no prescaling
 
 }
+// should be call after interrupt enable
+void initADC(void){
+    ADMUX = 0b11000010; // REFS1:0 =11 use internam 2.56 v, ARLAR = 0 the result is right adjusted, 0, MUX3:0 = 0010 (pc2 - voltage)
+    ADCSRA = 0b11001111; // ADEN = 1 ADC enable, ADSC = 1 - ADC Start Conversion, ADFR = 0 - no free run mode, ADIF - no change, ADIE = 1: ADC Interrupt Enable, ADPS2:0= 000  - ADC Prescaler = 2  
+    
+}
 
 
 
@@ -215,39 +256,24 @@ int main(void)
     initTimers();
     
     lcd_clear();
-    lcd_init();
-    
+    lcd_init();    
     lcd_on();
-    // lcd_set_cursor(0,0);
-    //lcd_enable_blinking();
-    //  lcd_puts("Set:");
-    // itoa(settedVoltage,str,10);
-    //  lcd_return_home();
-    //   lcd_set_cursor(1,1);
-    //  lcd_puts(str);
-    settedVoltage =  eeprom_read_word(&settedVoltageEeprom);
+    
+    settedVoltage =  eeprom_read_word(&settedVoltageEeprom);    
     settedCurrent = eeprom_read_word(&settedCurrentEeprom);
+    
+    if (!(settedVoltage >=0 && settedVoltage <= VOLTAGE_MAX)) settedVoltage = 0;
+    if (! (settedCurrent >=0 && settedCurrent <= CUR_MAX)) settedCurrent = 0;
+    
     sei();    
+    initADC();
     
      displeyVal();
      
     while (1)
     {
-       // test++;
-      //  if (LcdNeed2refresh > 0) {
-      //    displeyVal(0);  displeyVal(1); LcdNeed2refresh = 0;}
         displeyVal();
-        //   	CUR_LIMIT_INV;
-        /*    for (char i=0; i < 2; i++) {
-        lcd_set_cursor(0,i);
-        lcd_puts("     ");
-        }
-        _delay_ms(300);
-        for (char i=0; i < 2; i++) {
-        lcd_set_cursor(0,i);
-        lcd_puts("50    ");
-        }
-        _delay_ms(300);*/
+        
     }
 }
 
