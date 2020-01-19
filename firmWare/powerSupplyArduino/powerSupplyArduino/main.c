@@ -33,6 +33,8 @@ enum AdcInputs {VOLTAGE_ADC = 0b0010, CURRENT_ADC = 0b0000, TERM_ADC = 0b0011} A
 #define  CUR_MAX 1700 
 #define  CUR_MAX_PWM 511 // up to 2.5v because use one value for ADC ( has limit on 2.56v ) and for lm464
 
+#define  MAX_POWER 3500000 // 350 W  
+
 // shunt resist 0.04 ohm 
 
 
@@ -80,9 +82,10 @@ void readEncoder(void){
     if ((curEncoder==128 && lastEncoder == 192 )|| (curEncoder == 160 && lastEncoder == 128)) {
         switch (mode) {
             case VOLTAGE_SET_MODE:
-            if (settedVoltage>=ENCODER_STEP) settedVoltage-=10;  break;
+            if (settedVoltage>=ENCODER_STEP) settedVoltage-=ENCODER_STEP;             
+             break;
             case CURRENT_SET_MODE:
-            if (settedCurrent>=ENCODER_STEP) settedCurrent-=10; break;
+            if (settedCurrent>=ENCODER_STEP) settedCurrent-=ENCODER_STEP; break;
             default: break;
         }
 
@@ -91,9 +94,16 @@ void readEncoder(void){
     if ((curEncoder == 128 && lastEncoder == 160) || (curEncoder == 192 && lastEncoder == 128)) {
         switch (mode) {
             case VOLTAGE_SET_MODE:
-            if (settedVoltage < VOLTAGE_MAX - ENCODER_STEP) settedVoltage+=10; break;
+            if (settedVoltage < VOLTAGE_MAX - ENCODER_STEP) settedVoltage+=ENCODER_STEP; 
+            // check power
+            if (settedVoltage * settedCurrent > MAX_POWER) settedCurrent = MAX_POWER/settedVoltage;
+            break;
             case CURRENT_SET_MODE:
-            if (settedCurrent < CUR_MAX - ENCODER_STEP)  settedCurrent+=10; break;
+            if (settedCurrent < CUR_MAX - ENCODER_STEP)  settedCurrent+=ENCODER_STEP; 
+            // check power
+            if (settedVoltage * settedCurrent > MAX_POWER) settedVoltage = MAX_POWER/settedCurrent;
+            
+            break;
             default: break;
         }
     }
@@ -102,8 +112,10 @@ void readEncoder(void){
     OCR1A = VAL2PWM10(settedCurrent , CUR_MAX, CUR_MAX_PWM);
     
     // refresh Current Led
-    if (ErrCode == NO_ERROR){
-    if (ErrCode == NO_ERROR && abs(CurrentCurrent - settedCurrent) <= CUR_LIMIT_DEV) CUR_LIMIT_ON; else CUR_LIMIT_OFF;}
+   /* 
+   Disabled because blinked then encoder is moving
+   if (ErrCode == NO_ERROR){
+    if (ErrCode == NO_ERROR && abs(CurrentCurrent - settedCurrent) <= CUR_LIMIT_DEV) CUR_LIMIT_ON; else CUR_LIMIT_OFF;}*/
     
     // set that display should be refreshed
     LcdNeed2refresh = 1;
@@ -132,9 +144,9 @@ ISR(ADC_vect)
         
         switch(AdcInput){
             case VOLTAGE_ADC:
-                        CurrentVoltage = (uint32_t)AdcAvgBuf * (uint32_t)VOLTAGE_MAX /((uint16_t)1020 << 2) ; break; 
+                        CurrentVoltage = (uint32_t)AdcAvgBuf * (uint32_t)VOLTAGE_MAX /((uint16_t)VOLTAGE_MAX_PWM << 2) ; break; 
             case CURRENT_ADC: 
-                        CurrentCurrent =  (uint32_t)AdcAvgBuf * (uint32_t)CUR_MAX / ((uint16_t)1020 << 2) ; break;  
+                        CurrentCurrent =  (uint32_t)AdcAvgBuf * (uint32_t)CUR_MAX / ((uint16_t)CUR_MAX_PWM << 2) ; break;  
             case TERM_ADC:     break; // need todo   
             
         }
