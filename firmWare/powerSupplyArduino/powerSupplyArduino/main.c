@@ -10,24 +10,30 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include "lcd.h"
+#include "version.h"
 #include <stdlib.h>
 #include "avr/interrupt.h"
 #include "string.h"
 #include "avr/eeprom.h"
 
 enum modes {NORMAL_MODE, VOLTAGE_SET_MODE, CURRENT_SET_MODE} mode; // 0 - work mode (display cur volumes), 1 - set voltage, 2 - set current
+enum errors {NO_ERROR, NO_VOLTAGE, BAD_VOLTAGE, UNKNOWN} ErrCode = UNKNOWN;    
 enum AdcInputs {VOLTAGE_ADC = 0b0010, CURRENT_ADC = 0b0000, TERM_ADC = 0b0011} AdcInput = VOLTAGE_ADC;    
 
-#define VAL2PWM10(val, maxval) (uint32_t)val* 1023/maxval
+#define VAL2PWM10(val, maxval, maxpwm) (uint32_t)val* maxpwm/maxval
 #define CUR_LIMIT_ON PORTB |= 0x01
 #define CUR_LIMIT_OFF PORTB&=0xFE
 #define CUR_LIMIT_INV PORTB^=0x01
+#define CUR_LIMIT_DEV 10
 #define BLINK_POST_SCAL 25
 #define ENCODER_STEP 10
 
-#define  VOLTAGE_MAX 2500
-#define  CUR_MAX 1700
-#define  UREF = 256 //2.56 * 10
+#define  VOLTAGE_MAX 2600
+#define  VOLTAGE_MAX_PWM 1023 //up to 5v (pwm 100%)
+#define  CUR_MAX 1700 
+#define  CUR_MAX_PWM 511 // up to 2.5v because use one value for ADC ( has limit on 2.56v ) and for lm464
+
+// shunt resist 0.04 ohm 
 
 
 
@@ -36,11 +42,11 @@ uint8_t blink = 1;
 uint8_t blinkPostScal =  BLINK_POST_SCAL;
 
 uint16_t  volatile settedVoltage = 500;
-uint16_t  settedVoltageEeprom EEMEM = 100;
+uint16_t  settedVoltageEeprom EEMEM = 0;
 uint16_t  volatile settedCurrent = 200;
-uint16_t  settedCurrentEeprom EEMEM = 100 ;
-uint16_t  volatile CurrentCurrent = 10;
-uint16_t  volatile CurrentVoltage = 2550;
+uint16_t  settedCurrentEeprom EEMEM = 0 ;
+uint16_t  volatile CurrentCurrent = 0;
+uint16_t  volatile CurrentVoltage = 0;
 uint16_t volatile AdcAvgBuf;
 uint8_t volatile AdcCount = 0;
 uint8_t volatile AdcCountAvg = 0;
@@ -48,6 +54,7 @@ uint16_t volatile AdcvBuf;
 
 uint8_t volatile  LcdNeed2refresh = 0;
 
+//uint8_t ErrCode = 0;
 uint8_t lastEncoder;
 
 char lcdStr0[16+1];
@@ -58,7 +65,7 @@ char bufStr[8+1];
 void readEncoder(void){
     //mode = PORTB;
     uint8_t curEncoder = PINB & (7<<5);
-    if (lastEncoder  == 0 || curEncoder == lastEncoder) {lastEncoder = curEncoder; return;}
+    if (lastEncoder  == 0 || curEncoder == lastEncoder || ErrCode) {lastEncoder = curEncoder; return;}
     // check press button
     if (curEncoder & (1 << PINB7) && !(lastEncoder & (1 << PINB7) )) {
         mode = (mode+1) % 3;
@@ -89,12 +96,15 @@ void readEncoder(void){
             if (settedCurrent < CUR_MAX - ENCODER_STEP)  settedCurrent+=10; break;
             default: break;
         }
-        
-
     }
     // set value to PWM
-    OCR1B = VAL2PWM10(settedVoltage, VOLTAGE_MAX);
-    OCR1A = VAL2PWM10(settedCurrent , CUR_MAX);
+    OCR1B = VAL2PWM10(settedVoltage, VOLTAGE_MAX, VOLTAGE_MAX_PWM);
+    OCR1A = VAL2PWM10(settedCurrent , CUR_MAX, CUR_MAX_PWM);
+    
+    // refresh Current Led
+    if (ErrCode == NO_ERROR){
+    if (ErrCode == NO_ERROR && abs(CurrentCurrent - settedCurrent) <= CUR_LIMIT_DEV) CUR_LIMIT_ON; else CUR_LIMIT_OFF;}
+    
     // set that display should be refreshed
     LcdNeed2refresh = 1;
     
@@ -107,19 +117,10 @@ ISR(TIMER0_OVF_vect){
     blinkPostScal--;
     readEncoder();
     if (!blinkPostScal){
-        CUR_LIMIT_INV;
+        if (ErrCode != NO_ERROR && ErrCode != UNKNOWN)  CUR_LIMIT_INV;
         blink=~blink;
-        blinkPostScal = BLINK_POST_SCAL;
-        //displeyCurVal();
+        blinkPostScal = BLINK_POST_SCAL;        
         ++LcdNeed2refresh;
-        /*  if (blink){
-        lcd_return_home();
-        lcd_puts("50");
-        } else
-        {
-        lcd_return_home();
-        lcd_puts("  ");
-        }*/
     }
 }
 
@@ -137,6 +138,9 @@ ISR(ADC_vect)
             case TERM_ADC:     break; // need todo   
             
         }
+        // refresh Current Led
+        if (ErrCode == NO_ERROR){
+        if ( abs(CurrentCurrent - settedCurrent) <= CUR_LIMIT_DEV) CUR_LIMIT_ON; else CUR_LIMIT_OFF;}
         //reset avg count
       AdcCountAvg = 0;  
       // increment conversation
@@ -175,7 +179,7 @@ void displeyVal(void){
         switch (len) {
             case 4: lcdStr0[2] = bufStr[0]; lcdStr0[3] = bufStr[1]; lcdStr0[4] = ','; lcdStr0[5] = bufStr[2]; lcdStr0[6] = bufStr[3]; break;
             case 3: lcdStr0[2] = bufStr[0]; lcdStr0[3] = ','; lcdStr0[4] = bufStr[1]; lcdStr0[5] = bufStr[2];  break;
-            case 1:
+            case 1: lcdStr0[2] = '0'; lcdStr0[3] = ','; lcdStr0[4] = '0';  lcdStr0[5] = bufStr[0];  break;
             case 2: lcdStr0[2] = '0'; lcdStr0[3] = ','; lcdStr0[4] = bufStr[0]; lcdStr0[5] = bufStr[1]; break;
             
         }
@@ -194,7 +198,7 @@ void displeyVal(void){
         switch (strlen(bufStr)) {
             case 4: lcdStr1[2] = bufStr[0]; lcdStr1[3] = bufStr[1]; lcdStr1[4] = ','; lcdStr1[5] = bufStr[2]; lcdStr1[6] = bufStr[3];  break;
             case 3: lcdStr1[2] = bufStr[0]; lcdStr1[3] = ','; lcdStr1[4] = bufStr[1]; lcdStr1[5] = bufStr[2];  break;
-            case 1:
+            case 1: lcdStr1[2] = '0'; lcdStr1[3] = ','; lcdStr1[4] = '0';  lcdStr1[5] = bufStr[0];  break;
             case 2: lcdStr1[2] = '0'; lcdStr1[3] = ','; lcdStr1[4] = bufStr[0]; lcdStr1[5] = bufStr[1];  break;
         }
         lcdStr1[len==4?7:6] = ' ';
@@ -205,7 +209,7 @@ void displeyVal(void){
     lcd_puts(lcdStr1);
 
     //debug info
-    
+  /*  
      lcd_set_cursor(12,0);
      itoa(OCR1B, bufStr, 10);
      lcd_puts(bufStr);
@@ -214,7 +218,7 @@ void displeyVal(void){
     itoa(OCR1A, bufStr, 10);
     lcd_puts(bufStr);
     
-   
+   */
     
     
 
@@ -247,10 +251,41 @@ void initTimers(void){
 void initADC(void){
     ADMUX = 0b11000010; // REFS1:0 =11 use internam 2.56 v, ARLAR = 0 the result is right adjusted, 0, MUX3:0 = 0010 (pc2 - voltage)
     ADCSRA = 0b11001111; // ADEN = 1 ADC enable, ADSC = 1 - ADC Start Conversion, ADFR = 0 - no free run mode, ADIF - no change, ADIE = 1: ADC Interrupt Enable, ADPS2:0= 000  - ADC Prescaler = 2  
-    
+    // set to 0 value
+    OCR1B = 0;
+    OCR1A = 0;    
 }
 
 
+
+enum errors startTest()
+{
+	// display test
+    lcd_return_home();
+    lcd_puts("Firmware: ");
+    lcd_puts(VERSION);
+    lcd_set_cursor(0,1);
+    lcd_puts("Starting test...");
+    CUR_LIMIT_ON;
+    // set value to PWM 2v .5A
+    OCR1B = VAL2PWM10(200, VOLTAGE_MAX, VOLTAGE_MAX_PWM);
+    OCR1A = VAL2PWM10(50, CUR_MAX, CUR_MAX_PWM);
+    _delay_ms(500);
+    //check current voltage
+   if (CurrentVoltage == 0) {
+        lcd_set_cursor(0,1);
+        lcd_puts("U=0v Err");
+        return NO_VOLTAGE;
+        }  
+     if (abs (CurrentVoltage - 200) > 50) {
+         lcd_set_cursor(0,1);
+         lcd_puts("U is wrong. Err");
+         return BAD_VOLTAGE;
+     }
+  _delay_ms(3000);
+  lcd_clear();
+  return NO_ERROR;
+}
 
 int main(void)
 {
@@ -260,25 +295,32 @@ int main(void)
     
     lcd_clear();
     lcd_init();    
-    lcd_on();
+    lcd_on(); 
     
-    settedVoltage =  eeprom_read_word(&settedVoltageEeprom);    
-    settedCurrent = eeprom_read_word(&settedCurrentEeprom);
     
-    if (!(settedVoltage >=0 && settedVoltage <= VOLTAGE_MAX)) settedVoltage = 500; //default 5v
-    if (! (settedCurrent >=0 && settedCurrent <= CUR_MAX)) settedCurrent = 200; //default 2A
-    
-     // set value to PWM
-     OCR1B = VAL2PWM10(settedVoltage, VOLTAGE_MAX);
-     OCR1A = VAL2PWM10(settedCurrent , CUR_MAX);
     
     
     sei();    
     initADC();
     
+    ErrCode = startTest();
+    
+    if (ErrCode == NO_ERROR) {
+    
+    settedVoltage =  eeprom_read_word(&settedVoltageEeprom);
+    settedCurrent = eeprom_read_word(&settedCurrentEeprom);
+    
+    if (!(settedVoltage >=0 && settedVoltage <= VOLTAGE_MAX)) settedVoltage = 500; //default 5v
+    if (! (settedCurrent >=0 && settedCurrent <= CUR_MAX)) settedCurrent = 200; //default 2A
+    
+    // set value to PWM
+    OCR1B = VAL2PWM10(settedVoltage, VOLTAGE_MAX, VOLTAGE_MAX_PWM);
+    OCR1A = VAL2PWM10(settedCurrent , CUR_MAX, CUR_MAX_PWM);
+    }    
      
     while (1)
     {
+        if (ErrCode != NO_ERROR) continue;
         displeyVal();
         
     }
