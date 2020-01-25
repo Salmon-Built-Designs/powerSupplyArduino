@@ -245,14 +245,14 @@ void copyValtoStr(char* lcdStr, uint16_t val )
     itoa(val, bufStr, 10);
     uint8_t  i;  
     //char* last = lcdStr+4;
-    lcdStr[5] = 0; // end of string 
+    *(lcdStr+5) = 0; // end of string 
     i  = strlen(bufStr);
     
     for (char* last = lcdStr+4; last >= lcdStr; last--) {
-        if (last == lcdStr+2) {last[0] = '.'; continue;}
+        if (last == lcdStr+2) {*last = '.'; continue;}
         
                 if (i)  *last = bufStr[--i];
-                    else    last[0] = '0';               
+                    else    *last = '0';               
         }         
         
 }
@@ -411,9 +411,9 @@ int main(void)
     lcd_init();    
     lcd_on(); 
     
-  /*  uint16_t test = 25;
+    uint16_t test = 25;
     char ts[16+1]; ts[0] = 'U'; ts[1] = ':';
-    copyValtoStr(ts+2, test);*/
+    copyValtoStr(ts+2, test);
     
     
     sei();    
