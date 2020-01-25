@@ -16,17 +16,20 @@
 #include "string.h"
 #include "avr/eeprom.h"
 
-enum modes {NORMAL_MODE, VOLTAGE_SET_MODE, CURRENT_SET_MODE} mode; // 0 - work mode (display cur volumes), 1 - set voltage, 2 - set current
+enum modes {NORMAL_MODE, VOLTAGE_SET_MODE, CURRENT_SET_MODE, CHARGE_SET, CHARGE_PROGRESS, CHARGE_STOP} mode; // 0 - work mode (display cur volumes), 1 - set voltage, 2 - set current
 enum errors {NO_ERROR, NO_VOLTAGE, BAD_VOLTAGE, UNKNOWN} ErrCode = UNKNOWN;    
-enum AdcInputs {VOLTAGE_ADC = 0b0010, CURRENT_ADC = 0b0000, TERM_ADC = 0b0011} AdcInput = VOLTAGE_ADC;    
+enum adcInputs {VOLTAGE_ADC = 0b0010, CURRENT_ADC = 0b0000, TERM_ADC = 0b0011} AdcInput = VOLTAGE_ADC;    
+enum ledModes {OFF, ON, BLINK, FAST_BLINK} ledMode;
 
 #define VAL2PWM10(val, maxval, maxpwm) (uint32_t)val* maxpwm/maxval
 #define CUR_LIMIT_ON PORTB |= 0x01
 #define CUR_LIMIT_OFF PORTB&=0xFE
 #define CUR_LIMIT_INV PORTB^=0x01
-#define CUR_LIMIT_DEV 10
+#define CUR_LIMIT_DEV 5
 #define BLINK_POST_SCAL 25
+#define BLINK_POST_SCAL2 10
 #define ENCODER_STEP 10
+#define LONG_PUSH_COUNT 10
 
 #define  VOLTAGE_MAX 2600
 #define  VOLTAGE_MAX_PWM 1023 //up to 5v (pwm 100%)
@@ -35,17 +38,20 @@ enum AdcInputs {VOLTAGE_ADC = 0b0010, CURRENT_ADC = 0b0000, TERM_ADC = 0b0011} A
 
 #define  MAX_POWER 3500000 // 350 W  
 
+#define MAX_CHARDGE_VOLTAGE 1450
+
 // shunt resist 0.04 ohm 
 
 
 
-uint8_t blink = 1;
+uint8_t textBlink = 1;
 
 uint8_t blinkPostScal =  BLINK_POST_SCAL;
-
+uint8_t blinkPostScal2 = BLINK_POST_SCAL2;
 uint16_t  volatile settedVoltage = 500;
 uint16_t  settedVoltageEeprom EEMEM = 0;
 uint16_t  volatile settedCurrent = 200;
+uint16_t  settedChargeCurrent;
 uint16_t  settedCurrentEeprom EEMEM = 0 ;
 uint16_t  volatile CurrentCurrent = 0;
 uint16_t  volatile CurrentVoltage = 0;
@@ -56,11 +62,16 @@ uint16_t volatile AdcvBuf;
 
 uint8_t volatile  LcdNeed2refresh = 0;
 
+uint8_t volatile  longPush = 0;
+
+
+uint16_t  settedChargeCurrentEeprom EEMEM = 0 ;
+uint16_t  settedChargeCurrent = 200;
+
 //uint8_t ErrCode = 0;
 uint8_t lastEncoder;
 
-char lcdStr0[16+1];
-char lcdStr1[16+1];
+char lcdStr[16+1];
 char bufStr[8+1];
 
 
@@ -68,15 +79,54 @@ void readEncoder(void){
     //mode = PORTB;
     uint8_t curEncoder = PINB & (7<<5);
     if (lastEncoder  == 0 || curEncoder == lastEncoder || ErrCode) {lastEncoder = curEncoder; return;}
+        
     // check press button
     if (curEncoder & (1 << PINB7) && !(lastEncoder & (1 << PINB7) )) {
-        mode = (mode+1) % 3;
-        switch (mode) { 
+        ++longPush;
+       // mode = (mode+1) % 3;
+       /* switch (mode) { 
             case NORMAL_MODE: eeprom_write_word(&settedCurrentEeprom, settedCurrent);
             case CURRENT_SET_MODE: eeprom_write_word(&settedVoltageEeprom, settedVoltage);
             default: break;
-            }
+            }*/
     }
+    
+    //check return button
+    if (lastEncoder & (1 << PINB7) && !(curEncoder & (1 << PINB7) )){
+      if (longPush >= LONG_PUSH_COUNT){
+          switch (mode) {
+              case NORMAL_MODE: mode = CHARGE_SET; 
+                                settedVoltage = 0;
+                                settedChargeCurrent = eeprom_read_word(&settedChargeCurrentEeprom);
+                                if (settedCurrent > CUR_MAX) settedCurrent = 50;
+                                break;
+              case CHARGE_SET: mode = CHARGE_PROGRESS; 
+                               eeprom_write_word(&settedChargeCurrentEeprom, settedChargeCurrent); 
+                               settedVoltage = MAX_CHARDGE_VOLTAGE;
+                               settedCurrent = settedChargeCurrent;
+                               break;
+              case CHARGE_PROGRESS: mode = CHARGE_STOP;
+                                    settedVoltage = 0; settedCurrent = 0;
+                                    break;
+              default: break;
+          }
+          
+      }
+          else {
+              switch (mode) {
+                  case NORMAL_MODE: mode = VOLTAGE_SET_MODE; break;
+                  case VOLTAGE_SET_MODE: mode = CURRENT_SET_MODE; eeprom_write_word(&settedVoltageEeprom, settedVoltage); break; 
+                  case CURRENT_SET_MODE: mode = NORMAL_MODE; eeprom_write_word(&settedCurrentEeprom, settedCurrent); break;                  
+                  default: break;
+              }
+              
+          }
+      
+      longPush = 0;  
+        
+        
+    }
+    
     
     // to left
     if ((curEncoder==128 && lastEncoder == 192 )|| (curEncoder == 160 && lastEncoder == 128)) {
@@ -86,6 +136,8 @@ void readEncoder(void){
              break;
             case CURRENT_SET_MODE:
             if (settedCurrent>=ENCODER_STEP) settedCurrent-=ENCODER_STEP; break;
+            case CHARGE_SET:
+            if (settedChargeCurrent>=ENCODER_STEP) settedChargeCurrent-=ENCODER_STEP; break;
             default: break;
         }
 
@@ -101,9 +153,11 @@ void readEncoder(void){
             case CURRENT_SET_MODE:
             if (settedCurrent < CUR_MAX - ENCODER_STEP)  settedCurrent+=ENCODER_STEP; 
             // check power
-            if (settedVoltage * settedCurrent > MAX_POWER) settedVoltage = MAX_POWER/settedCurrent;
-            
+            if (settedVoltage * settedCurrent > MAX_POWER) settedVoltage = MAX_POWER/settedCurrent;            
             break;
+            
+            case CHARGE_SET: 
+            if (settedChargeCurrent < CUR_MAX)  settedChargeCurrent+=ENCODER_STEP; 
             default: break;
         }
     }
@@ -126,13 +180,24 @@ void readEncoder(void){
 
 //interrupts
 ISR(TIMER0_OVF_vect){
-    blinkPostScal--;
+    if (ledMode == ON) CUR_LIMIT_ON;
+    if (ledMode == OFF) CUR_LIMIT_OFF;
+    --blinkPostScal;
     readEncoder();
     if (!blinkPostScal){
-        if (ErrCode != NO_ERROR && ErrCode != UNKNOWN)  CUR_LIMIT_INV;
-        blink=~blink;
+        if (ledMode == FAST_BLINK)  CUR_LIMIT_INV;
+        textBlink=~textBlink;
         blinkPostScal = BLINK_POST_SCAL;        
         ++LcdNeed2refresh;
+        
+        if (longPush) ++longPush;
+        
+        --blinkPostScal2;
+        if (!blinkPostScal2){
+            if (ledMode == BLINK) CUR_LIMIT_INV;
+            blinkPostScal2 = BLINK_POST_SCAL2;
+            
+        }
     }
 }
 
@@ -150,9 +215,11 @@ ISR(ADC_vect)
             case TERM_ADC:     break; // need todo   
             
         }
+        // in charge mode check that process complete
+        if (CurrentCurrent < 5) {mode = CHARGE_STOP, settedVoltage = 0; settedCurrent = 0; ledMode = ON;}  
         // refresh Current Led
-        if (ErrCode == NO_ERROR){
-        if ( abs(CurrentCurrent - settedCurrent) <= CUR_LIMIT_DEV) CUR_LIMIT_ON; else CUR_LIMIT_OFF;}
+        if (ErrCode == NO_ERROR && (mode == NORMAL_MODE || mode == VOLTAGE_SET_MODE || mode == CURRENT_SET_MODE)){
+        if ( abs(CurrentCurrent - settedCurrent) <= CUR_LIMIT_DEV) ledMode = ON; else ledMode = OFF;}
         //reset avg count
       AdcCountAvg = 0;  
       // increment conversation
@@ -172,54 +239,89 @@ ISR(ADC_vect)
    
 }
 
+void copyValtoStr(char* lcdStr, uint16_t val )
+{
+    char bufStr[8+1];
+    itoa(val, bufStr, 10);
+    uint8_t  i;  
+    //char* last = lcdStr+4;
+    lcdStr[5] = 0; // end of string 
+    i  = strlen(bufStr);
+    
+    for (char* last = lcdStr+4; last >= lcdStr; last--) {
+        if (last == lcdStr+2) {last[0] = '.'; continue;}
+        
+                if (i)  *last = bufStr[--i];
+                    else    last[0] = '0';               
+        }         
+        
+}
+
 void displeyVal(void){
-    if (LcdNeed2refresh == 0) {return;} else {LcdNeed2refresh = 0;};
+    if (LcdNeed2refresh == 0) return; else LcdNeed2refresh = 0;
     lcd_return_home();
-
-    itoa(mode==1? settedVoltage:CurrentVoltage, bufStr, 10);
-
-    // display voltage in first line
-    for (int i = 0 ; i < LCD_COL_COUNT; i++) lcdStr0[i] = ' ';
-    char len;
-    if (mode != 1 || blink==1 )
-    {
+    lcd_clear();
+    switch (mode) {
+    // in charge setting display only charge setting
+    // Charge current:
+    // I:00.00 A
+    case CHARGE_SET: lcd_puts("Charge current:"); 
+                     if(!textBlink) break;
+                     lcdStr[0] = 'I'; lcdStr[1] = ':';
+                     copyValtoStr(lcdStr+2, settedChargeCurrent);
+                     lcdStr[7] = ' '; lcdStr[8] = 'A'; lcdStr[9] = 0;
+                     lcd_set_cursor(0,1);
+                     lcd_puts(lcdStr);
+                     break;
+   
         
-        lcdStr0[0] = 'U';
-        lcdStr0[1] = ':';
+        // in charging progress  display only current value
+        // Charging...
+        // I:00.00 U:00.00
+        case CHARGE_PROGRESS:   lcd_puts("Charging...");
+                                lcdStr[0] = 'I'; lcdStr[1] = ':';
+                                copyValtoStr(lcdStr+2, CurrentCurrent);
+                                lcdStr[7] = ' '; 
+                                lcdStr[8] = 'U';
+                                lcdStr[9] = ':';
+                                copyValtoStr(lcdStr+10, CurrentCurrent);
+                                lcd_set_cursor(0,1);
+                                lcd_puts(lcdStr);
+                                break;
         
-        len = strlen(bufStr);
-        switch (len) {
-            case 4: lcdStr0[2] = bufStr[0]; lcdStr0[3] = bufStr[1]; lcdStr0[4] = ','; lcdStr0[5] = bufStr[2]; lcdStr0[6] = bufStr[3]; break;
-            case 3: lcdStr0[2] = bufStr[0]; lcdStr0[3] = ','; lcdStr0[4] = bufStr[1]; lcdStr0[5] = bufStr[2];  break;
-            case 1: lcdStr0[2] = '0'; lcdStr0[3] = ','; lcdStr0[4] = '0';  lcdStr0[5] = bufStr[0];  break;
-            case 2: lcdStr0[2] = '0'; lcdStr0[3] = ','; lcdStr0[4] = bufStr[0]; lcdStr0[5] = bufStr[1]; break;
-            
-        }
+        // in mode charging complete display only info message
+        // CHARGING COMPLETE
+        // !!!!!!!!!!!!!!!!!
+        
+        case CHARGE_STOP:   lcd_puts("CHARGING COMPLETE");
+                            lcd_set_cursor(0,1);
+                            lcd_puts("!!!!!!!!!!!!!!!!!");
+                            break;
 
-        lcdStr0[len==4?7:6] = ' ';
-        lcdStr0[len==4?8:7] = 'V';
+    //itoa(mode==VOLTAGE_SET_MODE? settedVoltage:CurrentVoltage, bufStr, 10);
+
+    // in mode NORMAL and VOLTAGE_SET and CURRENT_SET
+    //display voltage in first line : U:00.00->00.00 V
+    case NORMAL_MODE:
+    case  VOLTAGE_SET_MODE:
+    case  CURRENT_SET_MODE: lcdStr[0] = 'U';
+                            lcdStr[1] = ':';
+                            copyValtoStr(lcdStr+2, CurrentVoltage);
+                            lcdStr[7] = '-'; lcdStr[8] = '>';
+                            if (mode == VOLTAGE_SET_MODE  && !textBlink)  for (uint8_t i = 9; i < 14; i++) lcdStr[i] = ' '; else copyValtoStr(lcdStr+9, settedVoltage);
+                            lcdStr[14] = ' '; lcdStr[15] = 'V'; lcdStr[16] = 0;
+                            lcd_puts(lcdStr);   
+
+    // display current in second line : I:00.00->00.00 A
+    
+                            lcdStr[0] = 'I';
+                            copyValtoStr(lcdStr+2, CurrentCurrent);
+                            if (mode == CURRENT_SET_MODE  && !textBlink)  for (uint8_t i = 9; i < 14; i++) lcdStr[i] = ' '; else copyValtoStr (lcdStr+9, settedCurrent);
+                             lcdStr[15] = 'I'; lcdStr[16] = 0;
+                            lcd_set_cursor(0,1);
+                            lcd_puts(lcdStr);  
+    
     }
-    // display current in second line
-    itoa(mode==2 ? settedCurrent: CurrentCurrent, bufStr, 10);
-    len = strlen(bufStr);
-    for (int i = 0 ; i < LCD_COL_COUNT; i++) lcdStr1[i] = ' ';
-    if ( mode != 2  || blink == 1) {
-        lcdStr1[0] = 'I';
-        lcdStr1[1] = ':';
-
-        switch (strlen(bufStr)) {
-            case 4: lcdStr1[2] = bufStr[0]; lcdStr1[3] = bufStr[1]; lcdStr1[4] = ','; lcdStr1[5] = bufStr[2]; lcdStr1[6] = bufStr[3];  break;
-            case 3: lcdStr1[2] = bufStr[0]; lcdStr1[3] = ','; lcdStr1[4] = bufStr[1]; lcdStr1[5] = bufStr[2];  break;
-            case 1: lcdStr1[2] = '0'; lcdStr1[3] = ','; lcdStr1[4] = '0';  lcdStr1[5] = bufStr[0];  break;
-            case 2: lcdStr1[2] = '0'; lcdStr1[3] = ','; lcdStr1[4] = bufStr[0]; lcdStr1[5] = bufStr[1];  break;
-        }
-        lcdStr1[len==4?7:6] = ' ';
-        lcdStr1[len==4?8:7] = 'A';
-    }
-    lcd_puts(lcdStr0);
-    lcd_set_cursor(0,1);
-    lcd_puts(lcdStr1);
-
     //debug info
   /*  
      lcd_set_cursor(12,0);
@@ -280,8 +382,8 @@ enum errors startTest()
     lcd_puts("Starting test...");
     CUR_LIMIT_ON;
     // set value to PWM 2v .5A
-    OCR1B = VAL2PWM10(200, VOLTAGE_MAX, VOLTAGE_MAX_PWM);
-    OCR1A = VAL2PWM10(50, CUR_MAX, CUR_MAX_PWM);
+    OCR1B = VAL2PWM10(100, VOLTAGE_MAX, VOLTAGE_MAX_PWM);
+    OCR1A = VAL2PWM10(30, CUR_MAX, CUR_MAX_PWM);
     _delay_ms(500);
     //check current voltage
    if (CurrentVoltage == 0) {
@@ -309,7 +411,9 @@ int main(void)
     lcd_init();    
     lcd_on(); 
     
-    
+  /*  uint16_t test = 25;
+    char ts[16+1]; ts[0] = 'U'; ts[1] = ':';
+    copyValtoStr(ts+2, test);*/
     
     
     sei();    
